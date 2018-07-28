@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luck.dao.RecordMapper" >
+  <resultMap id="BaseResultMap" type="com.luck.pojo.Record" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="send_id" property="sendId" jdbcType="INTEGER" />
+    <result column="receive_id" property="receiveId" jdbcType="INTEGER" />
+    <result column="group_id" property="groupId" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+    <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, send_id, receive_id, group_id, content, status, send_time, read_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.luck.pojo.Record" >
+    insert into record (id, send_id, receive_id, 
+      group_id, content, status, 
+      send_time, read_time)
+    values (#{id,jdbcType=INTEGER}, #{sendId,jdbcType=INTEGER}, #{receiveId,jdbcType=INTEGER}, 
+      #{groupId,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+      #{sendTime,jdbcType=TIMESTAMP}, #{readTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.luck.pojo.Record" >
+    insert into record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sendId != null" >
+        send_id,
+      </if>
+      <if test="receiveId != null" >
+        receive_id,
+      </if>
+      <if test="groupId != null" >
+        group_id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="sendTime != null" >
+        send_time,
+      </if>
+      <if test="readTime != null" >
+        read_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sendId != null" >
+        #{sendId,jdbcType=INTEGER},
+      </if>
+      <if test="receiveId != null" >
+        #{receiveId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        #{groupId,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="sendTime != null" >
+        #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="readTime != null" >
+        #{readTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.luck.pojo.Record" >
+    update record
+    <set >
+      <if test="sendId != null" >
+        send_id = #{sendId,jdbcType=INTEGER},
+      </if>
+      <if test="receiveId != null" >
+        receive_id = #{receiveId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        group_id = #{groupId,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="sendTime != null" >
+        send_time = #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="readTime != null" >
+        read_time = #{readTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.luck.pojo.Record" >
+    update record
+    set send_id = #{sendId,jdbcType=INTEGER},
+      receive_id = #{receiveId,jdbcType=INTEGER},
+      group_id = #{groupId,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      send_time = #{sendTime,jdbcType=TIMESTAMP},
+      read_time = #{readTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

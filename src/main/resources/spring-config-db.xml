@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        ">
+    <context:annotation-config />
+    <context:component-scan base-package="com.luck">
+        <context:include-filter type="regex" expression=".dao.*"/>
+        <context:include-filter type="regex" expression=".service.*"/>
+        <context:include-filter type="regex" expression=".interceptor.*"/>
+    </context:component-scan>
+
+    <context:property-placeholder location="classpath:db-dev-mycat.properties"/>
+
+
+    <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+        <property name="minIdle" value="${jdbc.minIdle}"/>
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <property name="removeAbandoned" value="true"/>
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}"/>
+        <property name="maxWait" value="${jdbc.maxWait}"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="filters" value="stat"/>
+        <property name="validationQuery" value="select 1"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxOpenPreparedStatements" value="${jdbc.maxOpenPreparedStatements}"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="druidDataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="druidDataSource"/>
+        <property name="mapperLocations" value="classpath:sqlmap/*Mapper.xml"/>
+        <!-- 分页插件 -->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageHelper">
+                    <property name="properties">
+                        <value>
+                            dialect=mysql
+                        </value>
+                    </property>
+                </bean>
+                <!-- 使用mybatis拦截器-->
+                <!--<bean id="tableSegInterceptor" class="com.luck.interceptor.TableSegInterceptor"/>-->
+            </array>
+        </property>
+    </bean>
+
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+        <constructor-arg ref="sqlSessionFactory"/>
+    </bean>
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.luck.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!-- redis config -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="300"/>
+        <property name="maxTotal" value="100"/>
+        <property name="testOnBorrow" value="true"/>
+    </bean>
+    <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+          destroy-method="destroy">
+        <property name="poolConfig" ref="jedisPoolConfig"/>
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="password" value="${redis.password}"/>
+        <property name="timeout" value="${redis.timeout}"/>
+        <property name="usePool" value="${redis.usePool}"/>
+        <property name="database" value="${redis.database}"/>
+    </bean>
+    <bean id="jedisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory"/>
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="valueSerializer">
+            <!--<bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>-->
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+    </bean>
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+        <constructor-arg name="poolConfig" ref="jedisPoolConfig"/>
+        <constructor-arg name="host" value="${redis.host}"/>
+        <constructor-arg name="port" value="${redis.port}" type="int"/>
+        <constructor-arg name="timeout" value="${redis.timeout}" type="int"/>
+        <!-- <constructor-arg name="password" value="${redis.password}"/>
+         <constructor-arg name="database" value="${redis.database}" type="int"/>-->
+    </bean>
+
+    <!-- 配置拦截器策略 -->
+    <bean id="strategyManager" class="com.luck.interceptor.strategy.StrategyManager">
+        <property name="strategies">
+            <map>
+                <entry key="MM" value="com.luck.interceptor.strategy.MMStrategy" />
+            </map>
+        </property>
+    </bean>
+
+</beans>
