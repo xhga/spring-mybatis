@@ -13,7 +13,7 @@
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
   <properties>
-    <spring.version>4.3.8.RELEASE</spring.version>
+    <spring.version>6.0.0</spring.version>
     <rocketmq.version>4.0.0-incubating</rocketmq.version>
     <cometd-version>2.6.0</cometd-version>
     <jersey.version>2.23</jersey.version>
